@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -47,19 +48,26 @@ func makeBacklogCountValues(model *SearchModel, keyword string) url.Values {
 func findBacklog(model *SearchModel, url string, results *[]Result) error {
 	resp, err := http.Get(url)
 	if err != nil {
+		log.Printf("url:%v", url)
+		log.Printf("response:%v", resp)
 		return err
 	}
 	defer resp.Body.Close()
 	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		log.Printf("url:%v", url)
+		log.Printf("contents:%v", contents)
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
+		log.Printf("url:%v", url)
 		return errors.New(fmt.Sprintf("%v %s", resp.StatusCode, contents))
 	}
 
 	var j interface{}
 	if err := json.Unmarshal(contents, &j); err != nil {
+		log.Printf("url:%v", url)
+		log.Printf("contents:%v", contents)
 		return err
 	}
 
@@ -76,19 +84,26 @@ func findBacklog(model *SearchModel, url string, results *[]Result) error {
 func count(values url.Values, url string) (int, error) {
 	resp, err := http.Get(url + "api/v2/issues/count?" + values.Encode())
 	if err != nil {
+		log.Printf("url:%v", url)
+		log.Printf("response:%v", resp)
 		return zero, err
 	}
 	defer resp.Body.Close()
 	contents, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
+		log.Printf("url:%v", url)
+		log.Printf("contents:%v", contents)
 		return zero, err
 	}
 	if resp.StatusCode != http.StatusOK {
+		log.Printf("url:%v", url)
 		return zero, errors.New(fmt.Sprintf("%v %v", resp.StatusCode, contents))
 	}
 	var j interface{}
 	if err := json.Unmarshal(contents, &j); err != nil {
+		log.Printf("url:%v", url)
+		log.Printf("contents:%v", contents)
 		return zero, err
 	}
 

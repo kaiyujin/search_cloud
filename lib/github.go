@@ -9,6 +9,8 @@ import (
 	"net/url"
 	"strings"
 
+	"log"
+
 	"github.com/koron/go-dproxy"
 )
 
@@ -33,24 +35,33 @@ func makeGithubValues(model *SearchModel, keyword string) url.Values {
 func findGithub(url, keyword string, model *SearchModel, results *[]Result) error {
 	resp, err := http.Get(url)
 	if err != nil {
+		log.Printf("url:%v", url)
+		log.Printf("response:%v", resp)
 		return err
 	}
 	defer resp.Body.Close()
 	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		log.Printf("url:%v", url)
+		log.Printf("contents:%v", contents)
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
+		log.Printf("url:%v", url)
 		return errors.New(fmt.Sprintf("%v %v", resp.StatusCode, contents))
 	}
 
 	var j interface{}
 	if err := json.Unmarshal(contents, &j); err != nil {
+		log.Printf("url:%v", url)
+		log.Printf("contents:%v", contents)
 		return err
 	}
 
 	results, err = parseGithub(dproxy.New(j), keyword, results)
 	if err != nil {
+		log.Printf("url:%v", url)
+		log.Printf("results:%v", results)
 		return err
 	}
 	nextUrl := relNext(resp.Header.Get("Link"))

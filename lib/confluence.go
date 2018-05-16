@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 
@@ -34,23 +35,32 @@ func findConfluence(model *SearchModel, url string, results *[]Result) error {
 	req.SetBasicAuth(model.Confluence.Id, model.Confluence.Pass)
 	resp, err := client.Do(req)
 	if err != nil {
+		log.Printf("url:%v", url)
+		log.Printf("response:%v", resp)
 		return err
 	}
 	defer resp.Body.Close()
 	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		log.Printf("url:%v", url)
+		log.Printf("contents:%v", contents)
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
+		log.Printf("url:%v", url)
 		return errors.New(fmt.Sprintf("%v %s", resp.StatusCode, contents))
 	}
 	var j interface{}
 	if err := json.Unmarshal(contents, &j); err != nil {
+		log.Printf("url:%v", url)
+		log.Printf("contents:%v", contents)
 		return err
 	}
 	dp := dproxy.New(j)
 	baseUrl, err := dp.M("_links").M("base").String()
 	if err != nil {
+		log.Printf("url:%v", url)
+		log.Printf("contents:%v", j)
 		return err
 	}
 	err = parseConfluence(dp, baseUrl, results)
